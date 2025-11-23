@@ -16,6 +16,139 @@ import {
 } from '../types.js';
 
 /**
+ * Map LaTeX command names to Unicode symbols
+ */
+const LATEX_TO_UNICODE: Record<string, string> = {
+  // Greek letters - lowercase
+  'alpha': 'α',
+  'beta': 'β',
+  'gamma': 'γ',
+  'delta': 'δ',
+  'epsilon': 'ε',
+  'zeta': 'ζ',
+  'eta': 'η',
+  'theta': 'θ',
+  'iota': 'ι',
+  'kappa': 'κ',
+  'lambda': 'λ',
+  'mu': 'μ',
+  'nu': 'ν',
+  'xi': 'ξ',
+  'pi': 'π',
+  'rho': 'ρ',
+  'sigma': 'σ',
+  'tau': 'τ',
+  'upsilon': 'υ',
+  'phi': 'φ',
+  'chi': 'χ',
+  'psi': 'ψ',
+  'omega': 'ω',
+  
+  // Greek letters - uppercase
+  'Alpha': 'Α',
+  'Beta': 'Β',
+  'Gamma': 'Γ',
+  'Delta': 'Δ',
+  'Epsilon': 'Ε',
+  'Zeta': 'Ζ',
+  'Eta': 'Η',
+  'Theta': 'Θ',
+  'Iota': 'Ι',
+  'Kappa': 'Κ',
+  'Lambda': 'Λ',
+  'Mu': 'Μ',
+  'Nu': 'Ν',
+  'Xi': 'Ξ',
+  'Pi': 'Π',
+  'Rho': 'Ρ',
+  'Sigma': 'Σ',
+  'Tau': 'Τ',
+  'Upsilon': 'Υ',
+  'Phi': 'Φ',
+  'Chi': 'Χ',
+  'Psi': 'Ψ',
+  'Omega': 'Ω',
+  
+  // Mathematical operators
+  'int': '∫',
+  'sum': '∑',
+  'prod': '∏',
+  'coprod': '∐',
+  'pm': '±',
+  'mp': '∓',
+  'times': '×',
+  'div': '÷',
+  'cdot': '·',
+  'ast': '∗',
+  'star': '⋆',
+  'circ': '∘',
+  'bullet': '•',
+  
+  // Relations
+  'le': '≤',
+  'leq': '≤',
+  'ge': '≥',
+  'geq': '≥',
+  'ne': '≠',
+  'neq': '≠',
+  'equiv': '≡',
+  'approx': '≈',
+  'sim': '∼',
+  'cong': '≅',
+  'propto': '∝',
+  
+  // Arrows
+  'to': '→',
+  'rightarrow': '→',
+  'leftarrow': '←',
+  'leftrightarrow': '↔',
+  'Rightarrow': '⇒',
+  'Leftarrow': '⇐',
+  'Leftrightarrow': '⇔',
+  
+  // Special symbols
+  'infty': '∞',
+  'infinity': '∞',
+  'partial': '∂',
+  'nabla': '∇',
+  'emptyset': '∅',
+  'varnothing': '∅',
+  'in': '∈',
+  'notin': '∉',
+  'subset': '⊂',
+  'supset': '⊃',
+  'subseteq': '⊆',
+  'supseteq': '⊇',
+  'cap': '∩',
+  'cup': '∪',
+  'wedge': '∧',
+  'vee': '∨',
+  'neg': '¬',
+  'lnot': '¬',
+  'forall': '∀',
+  'exists': '∃',
+  'nexists': '∄',
+  
+  // Other
+  'dots': '…',
+  'ldots': '…',
+  'cdots': '⋯',
+  'vdots': '⋮',
+  'ddots': '⋱',
+  'ell': 'ℓ',
+  'hbar': 'ℏ',
+  'imath': 'ı',
+  'jmath': 'ȷ',
+  'Re': 'ℜ',
+  'Im': 'ℑ',
+  'wp': '℘',
+  'deg': '°',
+  'angle': '∠',
+  'perp': '⊥',
+  'parallel': '∥',
+};
+
+/**
  * Parse a KaTeX string into our expression tree
  */
 export function parseKaTeX(latex: string): ExpressionNode {
@@ -59,9 +192,12 @@ function convertKaTeXNode(node: any): ExpressionNode {
     case 'textord':
     case 'mathord':
       // Regular text/math character
+      const text = node.text || '';
+      // Convert LaTeX commands to Unicode symbols
+      const value = LATEX_TO_UNICODE[text] || text;
       return {
         type: 'text',
-        value: node.text || '',
+        value,
         style: node.mode === 'math' ? 'italic' : 'normal'
       } as TextNode;
 
@@ -75,9 +211,11 @@ function convertKaTeXNode(node: any): ExpressionNode {
     case 'op':
     case 'operatorname':
       // Operator
+      const opText = node.text || node.name || '';
+      const opValue = LATEX_TO_UNICODE[opText] || opText;
       return {
         type: 'operator',
-        value: node.text || node.name || '',
+        value: opValue,
         style: 'normal'
       } as TextNode;
 
@@ -85,9 +223,11 @@ function convertKaTeXNode(node: any): ExpressionNode {
     case 'rel':
     case 'punct':
       // Binary operators, relations, punctuation
+      const binText = node.text || '';
+      const binValue = LATEX_TO_UNICODE[binText] || binText;
       return {
         type: 'operator',
-        value: node.text || '',
+        value: binValue,
         style: 'normal'
       } as TextNode;
 
@@ -176,9 +316,11 @@ function convertKaTeXNode(node: any): ExpressionNode {
           } as OperatorNode;
         }
       }
+      const atomText = node.text || '';
+      const atomValue = LATEX_TO_UNICODE[atomText] || atomText;
       return {
         type: 'symbol',
-        value: node.text || ''
+        value: atomValue
       } as TextNode;
 
     case 'accent':

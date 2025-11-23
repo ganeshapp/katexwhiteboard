@@ -308,6 +308,67 @@ const uppercaseLetters: Record<string, Glyph> = {
     baseline: 0.85,
     aspectRatio: 0.8,
     advance: 0.85
+  },
+  
+  // More uppercase needed for common usage
+  'B': {
+    char: 'B',
+    strokes: [
+      s(p(0.2, 0.05), p(0.2, 0.95)),
+      s(
+        p(0.2, 0.05), p(0.6, 0.05), p(0.75, 0.15),
+        p(0.75, 0.35), p(0.6, 0.48), p(0.3, 0.5)
+      ),
+      s(
+        p(0.3, 0.5), p(0.65, 0.52), p(0.8, 0.65),
+        p(0.8, 0.85), p(0.65, 0.95), p(0.2, 0.95)
+      )
+    ],
+    baseline: 0.85,
+    aspectRatio: 0.75,
+    advance: 0.8
+  },
+  
+  'C': {
+    char: 'C',
+    strokes: [
+      s(
+        p(0.85, 0.2), p(0.65, 0.05), p(0.4, 0.05),
+        p(0.2, 0.2), p(0.15, 0.5), p(0.2, 0.8),
+        p(0.4, 0.95), p(0.65, 0.95), p(0.85, 0.8)
+      )
+    ],
+    baseline: 0.85,
+    aspectRatio: 0.8,
+    advance: 0.85
+  },
+  
+  'D': {
+    char: 'D',
+    strokes: [
+      s(p(0.2, 0.05), p(0.2, 0.95)),
+      s(
+        p(0.2, 0.05), p(0.5, 0.05), p(0.7, 0.15),
+        p(0.8, 0.35), p(0.8, 0.65), p(0.7, 0.85),
+        p(0.5, 0.95), p(0.2, 0.95)
+      )
+    ],
+    baseline: 0.85,
+    aspectRatio: 0.8,
+    advance: 0.85
+  },
+  
+  'E': {
+    char: 'E',
+    strokes: [
+      s(p(0.2, 0.05), p(0.2, 0.95)),
+      s(p(0.2, 0.05), p(0.75, 0.05)),
+      s(p(0.2, 0.5), p(0.65, 0.5)),
+      s(p(0.2, 0.95), p(0.75, 0.95))
+    ],
+    baseline: 0.85,
+    aspectRatio: 0.75,
+    advance: 0.8
   }
 };
 
