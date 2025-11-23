@@ -1,0 +1,21 @@
+{
+  "name": "katex-whiteboard",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "webapp"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=webapp",
+    "build": "npm run build --workspaces",
+    "build:gh-pages": "npm run lib:build && npm run build --workspace=webapp",
+    "lib:build": "npm run build --workspace=@katex-whiteboard/handwriter",
+    "lib:dev": "npm run dev --workspace=@katex-whiteboard/handwriter"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}
+
