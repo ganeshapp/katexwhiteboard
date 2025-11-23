@@ -35,7 +35,7 @@ git commit -m "Deploy to GitHub Pages"
 
 # Push to gh-pages branch
 echo "🚀 Deploying to GitHub Pages..."
-git push -f git@github.com:ganeshapp/katexwhiteboard.git gh-pages:gh-pages
+git push -f https://github.com/ganeshapp/katexwhiteboard.git gh-pages:gh-pages
 
 echo "✨ Deployment complete!"
 echo "Your site will be available at: https://ganeshapp.github.io/katexwhiteboard/"
