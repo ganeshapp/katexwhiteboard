@@ -1,56 +1,54 @@
-# 🚀 GitHub Pages Deployment Checklist
+# 🚀 GitHub Pages Manual Deployment Checklist
 
-Follow these steps to deploy your KaTeX Whiteboard to GitHub Pages.
+Follow these steps to deploy your KaTeX Whiteboard to GitHub Pages (without GitHub Actions).
 
 ## ✅ Pre-Deployment Checklist
 
 - [ ] Code is working locally (`npm run dev`)
 - [ ] Production build works (`npm run build:gh-pages`)
-- [ ] All changes are committed
+- [ ] All changes are committed to main branch
 - [ ] Repository exists on GitHub
+- [ ] SSH key is set up (or ready to use HTTPS)
 
 ## 📋 Deployment Steps
 
-### Step 1: Push Your Code
+### Step 1: Configure GitHub Pages (One-Time Setup)
 
-```bash
-# Make sure you're on the main branch
-git checkout main
-
-# Add all files
-git add .
-
-# Commit your changes
-git commit -m "Setup GitHub Pages deployment"
-
-# Push to GitHub
-git push origin main
-```
-
-### Step 2: Enable GitHub Pages
-
-1. Go to your GitHub repository
+1. Go to your GitHub repository: `https://github.com/ganeshapp/katexwhiteboard`
 2. Click **Settings** (top menu)
 3. Click **Pages** (left sidebar)
 4. Under "Build and deployment":
-   - **Source**: Select **GitHub Actions** (not "Deploy from a branch")
-5. Save
+   - **Source**: Select **"Deploy from a branch"**
+   - **Branch**: Select **"gh-pages"** and **"/ (root)"**
+   - Click **Save**
 
-### Step 3: Wait for Deployment
+**Note:** The `gh-pages` branch will be created automatically when you first deploy.
 
-1. Go to the **Actions** tab
-2. You'll see "Deploy to GitHub Pages" workflow running
-3. Wait for it to complete (usually 2-5 minutes)
-4. Once green ✅, your site is live!
+### Step 2: Deploy Using the Script
+
+Simply run:
+
+```bash
+./deploy.sh
+```
+
+This will:
+- Build the library
+- Build the webapp
+- Push to the `gh-pages` branch
+- Deploy to GitHub Pages
+
+### Step 3: Wait for GitHub Pages
+
+1. Wait 1-2 minutes for GitHub to process
+2. You'll get a notification that your site is published
 
 ### Step 4: Access Your Site
 
 Your site will be available at:
 ```
-https://[YOUR-GITHUB-USERNAME].github.io/katexwhiteboard/
+https://ganeshapp.github.io/katexwhiteboard/
 ```
-
-Replace `[YOUR-GITHUB-USERNAME]` with your actual GitHub username.
 
 ## 🔍 Verification
 
@@ -65,53 +63,81 @@ Visit your deployed site and test:
 
 ## 🐛 Troubleshooting
 
+### "Permission denied (publickey)" error
+
+**Solution:**
+If you see this when deploying, edit `deploy.sh` and change the push line to use HTTPS:
+```bash
+git push -f https://github.com/ganeshapp/katexwhiteboard.git gh-pages:gh-pages
+```
+
+### "gh-pages branch not found" in Settings
+
+**Solution:**
+Run the deploy script once first to create the branch:
+```bash
+./deploy.sh
+```
+Then go back to Settings → Pages and select `gh-pages`.
+
 ### Site shows 404
 
 **Solution:**
-- Make sure GitHub Pages is enabled
-- Verify Source is set to "GitHub Actions"
-- Check that workflow completed successfully
-- Wait a few minutes and refresh
+- Wait 2-3 minutes and refresh
+- Verify GitHub Pages is enabled in Settings → Pages
+- Check that Source is "Deploy from a branch"
+- Check that Branch is "gh-pages" and "/ (root)"
+- Clear browser cache
 
 ### Blank white page
 
 **Solution:**
-- Open browser console (F12)
-- Check for errors
-- Verify the base path in `webapp/vite.config.ts` matches your repo name
-- Make sure it's `/katexwhiteboard/` (with slashes)
+- Open browser console (F12) and check for errors
+- Verify base path in `vite.config.ts` is `/katexwhiteboard/`
+- Try hard refresh (Ctrl+Shift+R or Cmd+Shift+R)
 
-### Build fails in Actions
-
-**Solution:**
-- Go to Actions tab and check the error log
-- Common issues:
-  - Missing dependencies: Run `npm install` locally
-  - TypeScript errors: Run `npm run build:gh-pages` locally to see errors
-  - Fix errors and push again
-
-### Assets not loading
+### Build fails
 
 **Solution:**
-- Check that base path is correct in `vite.config.ts`
-- Should be: `base: '/katexwhiteboard/'`
-- Clear browser cache and try again
+Run locally to see the error:
+```bash
+npm run build:gh-pages
+```
+Fix any TypeScript or build errors, then deploy again.
+
+### Deploy script fails
+
+**Solution:**
+Run commands manually (see MANUAL_DEPLOY.md):
+```bash
+npm run build:gh-pages
+cd webapp/dist
+git init
+git checkout -b gh-pages
+git add -A
+git commit -m "Deploy"
+git push -f https://github.com/ganeshapp/katexwhiteboard.git gh-pages:gh-pages
+cd ../..
+```
 
 ## 🔄 Updating Your Deployment
 
-Every time you push to `main`, GitHub Actions will automatically:
-1. Build the library
-2. Build the webapp
-3. Deploy to GitHub Pages
+To update your live site:
 
-So just:
 ```bash
+# 1. Make changes and test locally
+npm run dev
+
+# 2. Commit changes to main branch
 git add .
 git commit -m "Your update message"
 git push origin main
+
+# 3. Deploy to GitHub Pages
+./deploy.sh
 ```
 
-And wait for the Action to complete!
+That's it! Your site will update in 1-2 minutes.
 
 ## 📝 Notes
 

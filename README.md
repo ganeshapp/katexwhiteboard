@@ -160,19 +160,25 @@ npm run build
 
 ## 🚀 Deployment
 
-### GitHub Pages (Automatic)
+### GitHub Pages (Manual - No Actions Required)
 
-This project is configured for automatic deployment to GitHub Pages.
+Deploy to GitHub Pages without needing GitHub Actions:
 
-**Setup:**
-1. Go to your repository **Settings** → **Pages**
-2. Set Source to **GitHub Actions**
-3. Push to `main` branch
+**One-Time Setup:**
+1. Go to **Settings** → **Pages**
+2. Source: **"Deploy from a branch"**
+3. Branch: **"gh-pages"** and **"/ (root)"**
+4. Save
+
+**Deploy:**
+```bash
+./deploy.sh
+```
 
 **Your site will be live at:**
-`https://[your-username].github.io/katexwhiteboard/`
+`https://ganeshapp.github.io/katexwhiteboard/`
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
+See [MANUAL_DEPLOY.md](MANUAL_DEPLOY.md) and [DEPLOY_CHECKLIST.md](DEPLOY_CHECKLIST.md) for detailed instructions.
 
 ### Manual Build for Production
 
