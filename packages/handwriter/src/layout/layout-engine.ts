@@ -305,15 +305,17 @@ function layoutSqrt(node: SqrtNode, context: LayoutContext): LayoutResult {
  */
 function layoutOperator(node: OperatorNode, context: LayoutContext): LayoutResult {
   const fontSize = context.fontSize;
-  const operatorSize = fontSize * 1.5;
+  // Make integral larger than sum/product for better visibility
+  const operatorSize = node.type === 'integral' ? fontSize * 2.8 : fontSize * 2.0;
   
   // Get operator glyph
   const opChar = node.type === 'integral' ? '∫' : node.type === 'sum' ? '∑' : '∏';
+  console.log(`Layout operator: type="${node.type}", symbol="${opChar}"`);
   const glyph = getGlyph(opChar);
   
   const height = operatorSize;
   const width = height * glyph.aspectRatio;
-  const y = context.baselineY - height * 0.7;
+  const y = context.baselineY - height * 0.6;
   
   const glyphs: PositionedGlyph[] = [{
     glyph,
@@ -322,19 +324,58 @@ function layoutOperator(node: OperatorNode, context: LayoutContext): LayoutResul
     width
   }];
   
-  // TODO: Handle limits (upper/lower) if present
-  // For now, just the operator itself
+  const additionalStrokes: Array<{ points: Point[] }> = [];
+  
+  let totalWidth = width * glyph.advance;
+  let minY = y;
+  let maxY = y + height;
+  
+  // Handle limits (subscript = lower, superscript = upper)
+  if (node.lower || node.upper) {
+    const limitFontSize = fontSize * 0.45;
+    // Position limits closer to the integral, at the bottom-left for lower and top-right for upper
+    
+    if (node.lower) {
+      // Lower limit (subscript) - position at bottom-left of integral
+      const lowerContext: LayoutContext = {
+        ...context,
+        fontSize: limitFontSize,
+        currentX: context.currentX - fontSize * 0.1, // Slightly to the left
+        baselineY: context.baselineY + fontSize * 1.1 // Lower position
+      };
+      const lowerResult = layoutExpression(node.lower, lowerContext);
+      glyphs.push(...lowerResult.glyphs);
+      additionalStrokes.push(...lowerResult.additionalStrokes);
+      maxY = Math.max(maxY, lowerResult.box.y + lowerResult.box.height);
+      totalWidth = Math.max(totalWidth, lowerResult.box.x + lowerResult.box.width - context.currentX);
+    }
+    
+    if (node.upper) {
+      // Upper limit (superscript) - position at top-right of integral
+      const upperContext: LayoutContext = {
+        ...context,
+        fontSize: limitFontSize,
+        currentX: context.currentX + width * 0.6, // To the right
+        baselineY: context.baselineY - fontSize * 1.8 // Higher position
+      };
+      const upperResult = layoutExpression(node.upper, upperContext);
+      glyphs.push(...upperResult.glyphs);
+      additionalStrokes.push(...upperResult.additionalStrokes);
+      minY = Math.min(minY, upperResult.box.y);
+      totalWidth = Math.max(totalWidth, upperResult.box.x + upperResult.box.width - context.currentX);
+    }
+  }
   
   return {
     glyphs,
     box: {
       x: context.currentX,
-      y,
-      width: width * glyph.advance,
-      height,
-      baseline: height * 0.7
+      y: minY,
+      width: totalWidth,
+      height: maxY - minY,
+      baseline: context.baselineY - minY
     },
-    additionalStrokes: []
+    additionalStrokes
   };
 }
 

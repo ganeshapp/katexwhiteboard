@@ -452,14 +452,21 @@ glyphDatabase.set('∫', {
   char: '∫',
   strokes: [
     s(
-      p(0.7, 0.0), p(0.6, 0.05), p(0.5, 0.15),
-      p(0.45, 0.35), p(0.45, 0.65), p(0.5, 0.85),
-      p(0.6, 0.95), p(0.7, 1.0)
+      // Start at TOP-RIGHT
+      p(0.75, 0.02), p(0.68, 0.0), p(0.58, 0.0),
+      // Top hook curves back left and down
+      p(0.48, 0.02), p(0.42, 0.06), p(0.48, 0.12), p(0.52, 0.18),
+      // Middle slanted section going down-left
+      p(0.50, 0.30), p(0.48, 0.45), p(0.46, 0.60), p(0.44, 0.75),
+      // Transition to bottom hook
+      p(0.42, 0.85), p(0.38, 0.92),
+      // Bottom hook curves left
+      p(0.32, 0.97), p(0.22, 1.0), p(0.12, 0.98)
     )
   ],
-  baseline: 0.85,
-  aspectRatio: 0.5,
-  advance: 0.6
+  baseline: 0.75,
+  aspectRatio: 0.40,
+  advance: 0.50
 });
 
 glyphDatabase.set('∑', {

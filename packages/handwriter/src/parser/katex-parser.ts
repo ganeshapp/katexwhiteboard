@@ -156,6 +156,7 @@ export function parseKaTeX(latex: string): ExpressionNode {
     // Parse using KaTeX's internal parser
     // Note: __parse is an internal API not exposed in TypeScript types
     const parsed = (katex as any).__parse(latex);
+    console.log('KaTeX parsed AST:', JSON.stringify(parsed, null, 2));
     return convertKaTeXNode(parsed);
   } catch (error) {
     console.error('Error parsing KaTeX:', error);
@@ -193,8 +194,11 @@ function convertKaTeXNode(node: any): ExpressionNode {
     case 'mathord':
       // Regular text/math character
       const text = node.text || '';
+      // Strip leading backslash if present
+      const cleanText = text.startsWith('\\') ? text.substring(1) : text;
       // Convert LaTeX commands to Unicode symbols
-      const value = LATEX_TO_UNICODE[text] || text;
+      const value = LATEX_TO_UNICODE[cleanText] || text;
+      console.log(`Converting "${text}" -> "${cleanText}" -> "${value}" (mathord)`);
       return {
         type: 'text',
         value,
@@ -210,9 +214,25 @@ function convertKaTeXNode(node: any): ExpressionNode {
 
     case 'op':
     case 'operatorname':
-      // Operator
-      const opText = node.text || node.name || '';
-      const opValue = LATEX_TO_UNICODE[opText] || opText;
+      // Operator - check if it's a large operator first
+      const opName = node.name || node.text || '';
+      const cleanOpName = opName.startsWith('\\') ? opName.substring(1) : opName;
+      const largeOpType = getOperatorType(cleanOpName);
+      
+      if (largeOpType) {
+        // It's a large operator (int, sum, prod)
+        const opSymbol = LATEX_TO_UNICODE[cleanOpName] || cleanOpName;
+        console.log(`Converting "${opName}" -> "${cleanOpName}" -> "${opSymbol}" (${largeOpType})`);
+        return {
+          type: largeOpType,
+          lower: undefined,
+          upper: undefined
+        } as OperatorNode;
+      }
+      
+      // Regular operator
+      const opValue = LATEX_TO_UNICODE[cleanOpName] || (node.text || node.name || '');
+      console.log(`Converting "${opName}" -> "${cleanOpName}" -> "${opValue}" (operator)`);
       return {
         type: 'operator',
         value: opValue,
@@ -224,7 +244,8 @@ function convertKaTeXNode(node: any): ExpressionNode {
     case 'punct':
       // Binary operators, relations, punctuation
       const binText = node.text || '';
-      const binValue = LATEX_TO_UNICODE[binText] || binText;
+      const cleanBinText = binText.startsWith('\\') ? binText.substring(1) : binText;
+      const binValue = LATEX_TO_UNICODE[cleanBinText] || binText;
       return {
         type: 'operator',
         value: binValue,
@@ -234,6 +255,16 @@ function convertKaTeXNode(node: any): ExpressionNode {
     case 'supsub':
       // Superscript and/or subscript
       const base = node.base ? convertKaTeXNode(node.base) : { type: 'text', value: '' } as TextNode;
+      
+      // Check if base is an operator (integral, sum, etc.) - handle limits
+      if (base.type === 'integral' || base.type === 'sum' || base.type === 'product') {
+        const operatorNode = base as OperatorNode;
+        return {
+          type: operatorNode.type,
+          lower: node.sub ? convertKaTeXNode(node.sub) : undefined,
+          upper: node.sup ? convertKaTeXNode(node.sup) : undefined
+        } as OperatorNode;
+      }
       
       if (node.sup && node.sub) {
         // Both superscript and subscript
@@ -301,9 +332,12 @@ function convertKaTeXNode(node: any): ExpressionNode {
           upper: undefined
         } as OperatorNode;
       }
+      const opTokenText = node.text || '';
+      const cleanOpTokenText = opTokenText.startsWith('\\') ? opTokenText.substring(1) : opTokenText;
+      const opTokenValue = LATEX_TO_UNICODE[cleanOpTokenText] || opTokenText;
       return {
         type: 'operator',
-        value: node.text || ''
+        value: opTokenValue
       } as TextNode;
 
     case 'atom':
@@ -317,7 +351,8 @@ function convertKaTeXNode(node: any): ExpressionNode {
         }
       }
       const atomText = node.text || '';
-      const atomValue = LATEX_TO_UNICODE[atomText] || atomText;
+      const cleanAtomText = atomText.startsWith('\\') ? atomText.substring(1) : atomText;
+      const atomValue = LATEX_TO_UNICODE[cleanAtomText] || atomText;
       return {
         type: 'symbol',
         value: atomValue
@@ -377,15 +412,16 @@ function getDelimiterType(delimiter: string): 'parenthesis' | 'bracket' | 'brace
  * Get operator type from KaTeX operator text
  */
 function getOperatorType(text: string): 'integral' | 'sum' | 'product' | null {
+  const cleanText = text.startsWith('\\') ? text.substring(1) : text;
   const opMap: Record<string, 'integral' | 'sum' | 'product'> = {
     '∫': 'integral',
-    '\\int': 'integral',
+    'int': 'integral',
     '∑': 'sum',
-    '\\sum': 'sum',
+    'sum': 'sum',
     '∏': 'product',
-    '\\prod': 'product'
+    'prod': 'product'
   };
-  return opMap[text] || null;
+  return opMap[cleanText] || null;
 }
 
 /**
